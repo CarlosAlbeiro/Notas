@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios"; //Permite hacer peticiones
 import Swal from "sweetalert2"
 
