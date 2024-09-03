@@ -1,9 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 .App {
   text-align: center;
+  height: 100vh;
 }
 
 .App-logo {
@@ -39,4 +36,21 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.cuerpo{
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.cuerpoNota{
+  height: 100px;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.add:hover{
+
+  background: #282c34;
+
 }

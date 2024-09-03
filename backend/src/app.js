@@ -1,8 +1,6 @@
 //Exportamos las librerias necesarias para el funcionamiento
 import express from "express";
-import {config} from "dotenv";
 import { conexion } from "./conexion.js";
-
 
 //Instanciamos express para inciar la aplicacion
 const app = express();
@@ -25,37 +23,10 @@ app.use((req, res, next) => {
 });
 
 //Notas CRUD
-
-app.post("/crearNota", async (req, res) => {
-  const {nota} = req.body;
-   console.log("Nota en api->"+nota);
-  // Inserción de un nuevo registro
-  try {
-    // Realiza la inserción en la base de datos
-    conexion.query(
-      "INSERT INTO notas (nota, fecha_creacion) VALUES (?, NOW())",
-      [nota],
-      (err, result) => {
-        if (err) {
-          console.error("Error al insertar el nuevo la nota:", err);
-          res.status(500).json({error: "Error al insertar la nueva nota"});
-          return;
-        }
-
-        console.log("nota creada:", result.insertId);
-        res.json({message: "Inserción exitosa", insertId: result.insertId});
-      }
-    );
-  } catch (error) {
-    console.error("Error interno del servidor:", error);
-    res.status(500).json({error: "Error interno del servidor"});
-  }
-});
-
-app.get("/listarNota", async (req, res) => {
+app.get("/listarNota", async (req,res) => {
   try {
     // Realizar la consulta a la base de datos
-    conexion.query("SELECT * FROM notas", (err, results) => {
+    conexion.query("SELECT * FROM notas ORDER BY fecha_creacion desc", (err, results) => {
       if (err) {
         // En caso de error, mostrar un mensaje de error
         console.error("Error al ejecutar la consulta:", err);
@@ -74,6 +45,32 @@ app.get("/listarNota", async (req, res) => {
     });
   } catch (error) {
     // En caso de error interno, mostrar un mensaje de error
+    console.error("Error interno del servidor:", error);
+    res.status(500).json({error: "Error interno del servidor"});
+  }
+});
+
+app.post("/crearNota", async (req, res) => {
+  const {nota} = req.body;
+   console.log("Nota en api->"+nota);
+  // Inserción de un nuevo registro
+  try {
+    // Realiza la inserción en la base de datos
+    conexion.query(
+      "INSERT INTO notas (nota, estado, fecha_creacion) VALUES (?, 0 , NOW())",
+      [nota],
+      (err, result) => {
+        if (err) {
+          console.error("Error al insertar el nuevo la nota:", err);
+          res.status(500).json({error: "Error al insertar la nueva nota"});
+          return;
+        }
+
+        console.log("nota creada:", result.insertId);
+        res.json({message: "Inserción exitosa", insertId: result.insertId});
+      }
+    );
+  } catch (error) {
     console.error("Error interno del servidor:", error);
     res.status(500).json({error: "Error interno del servidor"});
   }
@@ -107,7 +104,33 @@ app.post("/actualizarNota", async (req, res) => {
   }
 });
 
-export{app}
+app.post("/finalizarNota", async (req, res) => {
+  const {id} = req.body;
+  // Actualización de un registro existente
+  try {
+    // Realiza la actualización en la base de datos
+    conexion.query(
+      "UPDATE notas SET estado = 1 WHERE id = ?",
+      [id],
+      (err, result) => {
+        if (err) {
+          console.error("Error al actualizar la nota:", err);
+          res.status(500).json({error: "Error al actualizar la nota"});
+          return;
+        }
+
+        console.log("Número de filas actualizadas:", result.affectedRows);
+        res.json({
+          message: "Actualización exitosa",
+          affectedRows: result.affectedRows,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error interno del servidor:", error);
+    res.status(500).json({error: "Error interno del servidor"});
+  }
+});
 
 app.listen(puerto, () => {
   console.log(`Servidor iniciado en: localhost:${puerto}`);
